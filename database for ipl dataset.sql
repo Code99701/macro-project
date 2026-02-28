@@ -17,23 +17,23 @@ USE ipl_database;
 --     player_name VARCHAR(100) UNIQUE
 -- );
 
--- CREATE TABLE Matches (
---     match_id INT PRIMARY KEY,
---     match_date DATE,
---     venue_id INT,
---     team1_id INT,
---     team2_id INT,
---     toss_winner_id INT,
---     winner_id INT,
---     result VARCHAR(50),
---     result_margin INT,
+CREATE TABLE Matches (
+    match_id INT PRIMARY KEY,
+    match_date DATE,
+    venue_id INT,
+    team1_id INT,
+    team2_id INT,
+    toss_winner_id INT,
+    winner_id INT,
+    result VARCHAR(50),
+    result_margin INT,
 
---     FOREIGN KEY (venue_id) REFERENCES Venues(venue_id),
---     FOREIGN KEY (team1_id) REFERENCES Teams(team_id),
---     FOREIGN KEY (team2_id) REFERENCES Teams(team_id),
---     FOREIGN KEY (toss_winner_id) REFERENCES Teams(team_id),
---     FOREIGN KEY (winner_id) REFERENCES Teams(team_id)
--- );
+    FOREIGN KEY (venue_id) REFERENCES Venues(venue_id),
+    FOREIGN KEY (team1_id) REFERENCES Teams(team_id),
+    FOREIGN KEY (team2_id) REFERENCES Teams(team_id),
+    FOREIGN KEY (toss_winner_id) REFERENCES Teams(team_id),
+    FOREIGN KEY (winner_id) REFERENCES Teams(team_id)
+);
 
 -- SHOW TABLES;
 
