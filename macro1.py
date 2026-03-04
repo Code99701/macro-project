@@ -1,113 +1,96 @@
-import pandas as pd
-df = pd.read_csv(r"D:\sem 4\Macro project\IPL Matches 2008-2020 (1).csv")
+# Importing the libraries
+import pygame
+import requests
 
+# Initialising the pygame
+pygame.init()
 
-# print(df.shape)
-# print(df.columns)
-# print(df.dtypes)
-# print(df.head(20))
+# Setting width and height of the window
+width = 550
+height = 550
 
-#_________________________________________dataset inspection___________________________________
-# df.info()
-# print(df.describe())
-# print(df.isnull().sum())
+# Creating the window
+screen = pygame.display.set_mode((width, height))
+pygame.display.set_caption("Sudoku")
 
-# print(df['team1'].unique())
-# print(df['team2'].unique())
-# print(df['result'].unique())
+font = pygame.font.Font("freesansbold.ttf", 35)
 
-# print(df.duplicated().sum())
+# ---------------- API SAFE CALL ----------------
+url = "https://sugoku.herokuapp.com/board?difficulty=easy"
+response = requests.get(url)
 
-# print(df['result'].value_counts())
-# print(df['toss_decision'].value_counts())
-
-# ________________________________________MISSING value handling________________________________
-
-
-# Checking missing values
-# print(df.isnull().sum())
-
-# Handling missing values
-# df['city'] = df['city'].fillna('Unknown')
-# df['player_of_match'] = df['player_of_match'].fillna('Not Awarded')
-# df['method'] = df['method'].fillna('Regular')
-# df['result_margin'] = df['result_margin'].fillna(0)
-
-# Verifying after handling
-# print(df.isnull().sum())
-# print((df.isnull().sum() / len(df)) * 100)
-
-#________________________________________DATA CLEANING_______________________________________________
-
-# Checking duplicate records
-# print(df.duplicated().sum())
-
-# Removing duplicate rows
-# df = df.drop_duplicates()
-
-# Cleaning text fields by removing extra spaces
-# df['team1'] = df['team1'].str.strip()
-# df['team2'] = df['team2'].str.strip()
-# df['winner'] = df['winner'].str.strip()
-
-# Verifying cleaning results
-# print(df.duplicated().sum())
-# print(df['team1'].unique())
-# print(df['result'].unique())
-
-# ---------------- Data Transformation ----------------
-
-# Converting date column to datetime format
-# df['date'] = pd.to_datetime(df['date'])
-
-# Extracting year and month from date
-# df['match_year'] = df['date'].dt.year
-# df['match_month'] = df['date'].dt.month
-
-# Converting neutral venue indicator to categorical values
-# df['neutral_venue'] = df['neutral_venue'].replace({0: 'No', 1: 'Yes'})
-
-# Handling result type for clarity
-# df['win_type'] = df['result'].fillna('No Result')
-
-# Verifying data types after transformation
-# print(df.dtypes)
-# print(df.head())
-
-# ---------------- Feature Engineering ----------------
-
-# Margin Category Feature
-df['margin_category'] = df['result_margin'].apply(
-    lambda x: 'Big Win' if x > 50 else ('Close Win' if x > 0 else 'No Margin')
-)
-
-# Toss Impact Feature
-df['toss_impact'] = (df['toss_winner'] == df['winner']).map({True: 'Yes', False: 'No'})
-
-# Match Type Feature
-df['match_type'] = df['eliminator'].map({'Y': 'Playoff', 'N': 'League'})
-
-# Venue Advantage Feature
-df['venue_advantage'] = (df['team1'] == df['winner']).map({True: 'Team1', False: 'Team2'})
-
-# Season Feature (MAKE SURE match_year EXISTS)
-if 'match_year' in df.columns:
-    df['season'] = df['match_year'].astype(str)
+if response.status_code == 200 and response.text.strip():
+    s_grid = response.json()['board']
 else:
-    print("Error: match_year column not found. Run data transformation first.")
+    print("API failed, using default board")
+    s_grid = [
+        [5,3,0,0,7,0,0,0,0],
+        [6,0,0,1,9,5,0,0,0],
+        [0,9,8,0,0,0,0,6,0],
+        [8,0,0,0,6,0,0,0,3],
+        [4,0,0,8,0,3,0,0,1],
+        [7,0,0,0,2,0,0,0,6],
+        [0,6,0,0,0,0,2,8,0],
+        [0,0,0,4,1,9,0,0,5],
+        [0,0,0,0,8,0,0,7,9]
+    ]
 
-print(df.head())
+grid_original = [[s_grid[x][y] for y in range(9)] for x in range(9)]
+grid_color = (52, 31, 151)
 
-# ---------------- Final Dataset Validation ----------------
+# ---------------- INSERT FUNCTION ----------------
+def insert(screen, position):
+    i, j = position[1], position[0]
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                return
+            if event.type == pygame.KEYDOWN:
+                if grid_original[i - 1][j - 1] != 0:
+                    return
+                if event.key == pygame.K_0:
+                    s_grid[i - 1][j - 1] = 0
+                    pygame.draw.rect(screen, (255, 255, 255),
+                                     (position[0] * 50 + 5, position[1] * 50 + 10, 40, 40))
+                    pygame.display.update()
+                    return
+                if pygame.K_1 <= event.key <= pygame.K_9:
+                    value = event.key - pygame.K_0
+                    pygame.draw.rect(screen, (255, 255, 255),
+                                     (position[0] * 50 + 5, position[1] * 50 + 10, 40, 40))
+                    text = font.render(str(value), True, (0, 0, 0))
+                    screen.blit(text, (position[0] * 50 + 15, position[1] * 50))
+                    s_grid[i - 1][j - 1] = value
+                    pygame.display.update()
+                    return
 
-print(df.isnull().sum())
-print(df.duplicated().sum())
-print(df.shape)
+# ---------------- GAME LOOP ----------------
+running = True
+while running:
+    screen.fill((255, 255, 255))
 
-# pd.set_option('display.max_columns', None)
-print(df.head())
+    for event in pygame.event.get():
+        if event.type == pygame.MOUSEBUTTONUP and event.button == 1:
+            pos = pygame.mouse.get_pos()
+            insert(screen, (pos[0] // 50, pos[1] // 50))
+        if event.type == pygame.QUIT:
+            running = False
 
-# save final Dataset
-df.to_csv("final_preprocessed_ipl.csv", index=False)
+    # Drawing the grid
+    for i in range(0, 10):
+        if i % 3 == 0:
+            pygame.draw.line(screen, (0, 0, 0), (50 + 50 * i, 50), (50 + 50 * i, 500), 4)
+            pygame.draw.line(screen, (0, 0, 0), (50, 50 + 50 * i), (500, 50 + 50 * i), 4)
+        pygame.draw.line(screen, (0, 0, 0), (50 + 50 * i, 50), (50 + 50 * i, 500), 2)
+        pygame.draw.line(screen, (0, 0, 0), (50, 50 + 50 * i), (500, 50 + 50 * i), 2)
 
-print("Final preprocessed dataset saved successfully.")
+    # Display numbers
+    for i in range(9):
+        for j in range(9):
+            if 0 < s_grid[i][j] < 10:
+                value = font.render(str(s_grid[i][j]), True, grid_color)
+                screen.blit(value, ((j + 1) * 50 + 15, (i + 1) * 50))
+
+    pygame.display.update()
+
+pygame.quit()
