@@ -58,56 +58,56 @@ CREATE TABLE Matches (
 -- SELECT DISTINCT player_of_match
 -- FROM processed_matches;
 
--- INSERT INTO Matches (
---     match_id,
---     match_date,
---     venue_id,
---     team1_id,
---     team2_id,
---     toss_winner_id,
---     winner_id,
---     result,
---     result_margin
--- )
--- SELECT
---     pm.id,
---     pm.date,
+INSERT INTO Matches (
+    match_id,
+    match_date,
+    venue_id,
+    team1_id,
+    team2_id,
+    toss_winner_id,
+    winner_id,
+    result,
+    result_margin
+)
+SELECT
+    pm.id,
+    pm.date,
 
---     v.venue_id,
+    v.venue_id,
 
---     t1.team_id,
---     t2.team_id,
+    t1.team_id,
+    t2.team_id,
 
---     tw.team_id,
---     w.team_id,
+    tw.team_id,
+    w.team_id,
 
---     pm.result,
---     pm.result_margin
+    pm.result,
+    pm.result_margin
 
--- FROM processed_matches pm
+FROM processed_matches pm
 
--- JOIN Venues v ON pm.venue = v.venue_name
--- JOIN Teams t1 ON pm.team1 = t1.team_name
--- JOIN Teams t2 ON pm.team2 = t2.team_name
--- JOIN Teams tw ON pm.toss_winner = tw.team_name
--- LEFT JOIN Teams w ON pm.winner = w.team_name;
+JOIN Venues v ON pm.venue = v.venue_name
+JOIN Teams t1 ON pm.team1 = t1.team_name
+JOIN Teams t2 ON pm.team2 = t2.team_name
+JOIN Teams tw ON pm.toss_winner = tw.team_name
+LEFT JOIN Teams w ON pm.winner = w.team_name;
 
 -- SELECT * FROM Matches;
 
--- SELECT COUNT(*) FROM Matches;
+SELECT COUNT(*) FROM Matches;
 
--- SELECT 
---     m.match_id,
---     t1.team_name AS team1,
---     t2.team_name AS team2,
---     w.team_name AS winner,
---     v.venue_name
--- FROM Matches m
+SELECT 
+    m.match_id,
+    t1.team_name AS team1,
+    t2.team_name AS team2,
+    w.team_name AS winner,
+    v.venue_name
+FROM Matches m
 
--- JOIN Teams t1 ON m.team1_id = t1.team_id
--- JOIN Teams t2 ON m.team2_id = t2.team_id
--- LEFT JOIN Teams w ON m.winner_id = w.team_id
--- JOIN Venues v ON m.venue_id = v.venue_id;
+JOIN Teams t1 ON m.team1_id = t1.team_id
+JOIN Teams t2 ON m.team2_id = t2.team_id
+LEFT JOIN Teams w ON m.winner_id = w.team_id
+JOIN Venues v ON m.venue_id = v.venue_id;
 
 SELECT 
     t.team_name,
