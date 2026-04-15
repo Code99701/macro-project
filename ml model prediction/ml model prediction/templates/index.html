@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IPL Win Predictor | Max Limit AI analytics</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../static/css/styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="blob-c blob-1"></div>
+    <div class="blob-c blob-2"></div>
+    <div id="toastContainer" class="toast-container"></div>
+    <canvas id="particleCanvas"></canvas>
+
+    <div class="container">
+        <header class="glass-header">
+            <h1 id="mainTitle">IPL Win <span>Predictor</span> & Analyzer</h1>
+            <p>Real-time Predictor & Comprehensive Match Analytics</p>
+            
+            <div class="tab-controls">
+                <button class="tab-btn active" onclick="switchTab('predictorTab')">Prediction & Analysis</button>
+                <button class="tab-btn" onclick="switchTab('analyticsTab')">Global Database</button>
+            </div>
+        </header>
+
+        <main class="dashboard tab-content" id="predictorTab" style="display: grid;">
+            <div class="left-col">
+                <!-- Predictive Form -->
+                <div class="prediction-form glass-panel tilt-panel" style="margin-bottom: 2rem;">
+                    <h2>Match Status Predictor</h2>
+                    <form id="predictForm">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="batting_team">Batting Team</label>
+                                <select id="batting_team" name="batting_team" required>
+                                    <option value="" disabled selected>Select Batting Team</option>
+                                    <option value="Chennai Super Kings">Chennai Super Kings</option>
+                                    <option value="Mumbai Indians">Mumbai Indians</option>
+                                    <option value="Royal Challengers Bangalore">Royal Challengers Bangalore</option>
+                                    <option value="Kolkata Knight Riders">Kolkata Knight Riders</option>
+                                    <option value="Sunrisers Hyderabad">Sunrisers Hyderabad</option>
+                                    <option value="Rajasthan Royals">Rajasthan Royals</option>
+                                    <option value="Delhi Capitals">Delhi Capitals</option>
+                                    <option value="Kings XI Punjab">Kings XI Punjab</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="bowling_team">Bowling Team</label>
+                                <select id="bowling_team" name="bowling_team" required>
+                                    <option value="" disabled selected>Select Bowling Team</option>
+                                    <option value="Chennai Super Kings">Chennai Super Kings</option>
+                                    <option value="Mumbai Indians">Mumbai Indians</option>
+                                    <option value="Royal Challengers Bangalore">Royal Challengers Bangalore</option>
+                                    <option value="Kolkata Knight Riders">Kolkata Knight Riders</option>
+                                    <option value="Sunrisers Hyderabad">Sunrisers Hyderabad</option>
+                                    <option value="Rajasthan Royals">Rajasthan Royals</option>
+                                    <option value="Delhi Capitals">Delhi Capitals</option>
+                                    <option value="Kings XI Punjab">Kings XI Punjab</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="city">Host City</label>
+                            <select id="city" name="city" required>
+                                <option value="" disabled selected>Select Host City</option>
+                                <option value="Mumbai">Mumbai</option>
+                                <option value="Delhi">Delhi</option>
+                                <option value="Bangalore">Bangalore</option>
+                                <option value="Kolkata">Kolkata</option>
+                                <option value="Chennai">Chennai</option>
+                                <option value="Hyderabad">Hyderabad</option>
+                                <option value="Pune">Pune</option>
+                                <option value="Ahmedabad">Ahmedabad</option>
+                                <option value="Jaipur">Jaipur</option>
+                            </select>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="target">Target Score</label>
+                                <input type="number" id="target" name="target" placeholder="e.g. 185" required min="1">
+                            </div>
+                            <div class="form-group">
+                                <label for="score">Current Score</label>
+                                <input type="number" id="score" name="score" placeholder="e.g. 120" required min="0">
+                            </div>
+                        </div>
+                        <div class="form-row align-end">
+                            <div class="form-group">
+                                <label for="overs">Overs Completed: <span id="overVal">0.0</span></label>
+                                <input type="range" step="0.1" id="overs" name="overs" min="0" max="20" value="0">
+                            </div>
+                            <div class="form-group">
+                                <label for="wickets">Wickets Out</label>
+                                <input type="number" id="wickets" name="wickets" placeholder="e.g. 3" required min="0" max="10">
+                            </div>
+                        </div>
+                        <button type="submit" class="predict-btn" id="submitBtn">
+                            <span class="btn-text">Predict Now</span>
+                            <div class="spinner loader"></div>
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="right-col">
+                <div class="results-panel glass-panel tilt-panel" id="resultsPanel" style="display: none; margin-bottom: 2rem;">
+                    <h2>Prediction Engine Output</h2>
+                    <div class="teams-versus">
+                        <div class="team-stat" id="battingStat">
+                            <div class="team-name" id="resBattingTeam">Team 1</div>
+                            <div class="win-prob"><span class="prob-val" id="resBattingProb">0%</span></div>
+                        </div>
+                        <div class="vs">VS</div>
+                        <div class="team-stat" id="bowlingStat">
+                            <div class="team-name" id="resBowlingTeam">Team 2</div>
+                            <div class="win-prob"><span class="prob-val" id="resBowlingProb">0%</span></div>
+                        </div>
+                    </div>
+                    <div class="progress-container">
+                        <div class="progress-bar-wrap">
+                            <div class="progress-batting" id="progressBar"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dynamic Match Progression Tool -->
+                <div class="analyzer-panel glass-panel tilt-panel" id="analyzerSection" style="display: none;">
+                    <h2 id="analyzerTitle">Timeline Projection</h2>
+                    <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1rem;">Complete projected exact analytical probability worm.</p>
+                    <div class="chart-container" style="height: 380px; width: 100%;" id="analyzerCanvasWrapper">
+                        <canvas id="analyzerChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Global Analytics Dashboard TAB -->
+        <main class="dashboard tab-content" id="analyticsTab" style="display: none; grid-template-columns: 1fr 1fr;">
+            <div class="glass-panel analytics-card">
+                <h2>Most Picked Batting Teams</h2>
+                <div class="chart-container" style="height: 250px;">
+                    <canvas id="pieChart"></canvas>
+                </div>
+            </div>
+            <div class="glass-panel analytics-card">
+                <h2>Historical Global Averages</h2>
+                <div class="avg-stats">
+                    <div class="stat-box">
+                        <span class="stat-title">Avg Batting Win %</span>
+                        <span class="stat-number" id="avgWinProb">--</span>
+                    </div>
+                    <div class="stat-box">
+                        <span class="stat-title">Avg Bowling Win %</span>
+                        <span class="stat-number" id="avgLossProb">--</span>
+                    </div>
+                </div>
+            </div>
+            <div class="history-panel glass-panel" style="grid-column: 1 / -1;">
+                <h2>Recent Global Database Queries</h2>
+                <div class="history-list" id="historyList"></div>
+            </div>
+        </main>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.0/vanilla-tilt.min.js"></script>
+    <script src="../static/js/main.js"></script>
+</body>
+</html>
