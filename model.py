@@ -42,11 +42,11 @@ team_to_code = {
 # Reverse mapping
 code_to_team = {v: k for k, v in team_to_code.items()}
 
-
 def predict_winner(team1, team2):
 
-    # default match values
-    toss_winner = team1
+    import random
+
+    toss_winner = random.choice([team1, team2])
     toss_decision = "bat"
     venue = "M Chinnaswamy Stadium"
     match_type = "League"
@@ -54,6 +54,7 @@ def predict_winner(team1, team2):
     margin_category = 2
 
     input_data = pd.DataFrame([[
+
         team1,
         team2,
         toss_winner,
@@ -62,26 +63,19 @@ def predict_winner(team1, team2):
         match_type,
         toss_impact,
         margin_category
+
     ]], columns=features)
 
-    # encode categorical columns using trained encoders
     categorical_cols = [
-        "team1",
-        "team2",
-        "toss_winner",
-        "toss_decision",
-        "venue",
-        "match_type"
+        "team1","team2","toss_winner","toss_decision","venue","match_type"
     ]
 
     for col in categorical_cols:
         if col in encoders:
             input_data[col] = encoders[col].transform(input_data[col])
 
-    # prediction
     prediction = rf_model.predict(input_data)
 
-    # convert predicted label back to team name
     winner = encoders["winner"].inverse_transform(prediction)
 
     return winner[0]
