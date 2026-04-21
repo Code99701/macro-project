@@ -21,8 +21,17 @@ with app.app_context():
 
 ML_DIR     = os.path.join(BASE_DIR, 'ml')
 DATA_DIR   = os.path.join(BASE_DIR, 'data')
-pipe       = pickle.load(open(os.path.join(ML_DIR, 'pipe.pkl'),       'rb'))
-GROUND_MAP = pickle.load(open(os.path.join(ML_DIR, 'ground_map.pkl'), 'rb'))
+try:
+    pipe = pickle.load(open(os.path.join(ML_DIR, 'pipe.pkl'), 'rb'))
+except:
+    pipe = None
+    print("[WARNING] pipe.pkl not loaded")
+
+try:
+    GROUND_MAP = pickle.load(open(os.path.join(ML_DIR, 'ground_map.pkl'), 'rb'))
+except:
+    GROUND_MAP = {}
+    print("[WARNING] ground_map.pkl not loaded")
 
 CITY_ALIASES = {
     'Bangalore':  'Bengaluru',
@@ -506,4 +515,5 @@ def analytics():
 
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5000)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)

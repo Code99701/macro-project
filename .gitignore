@@ -4,4 +4,6 @@
 __pycache__/
 
 data/*
-!data/sample_matches.csv
+!data/matches.csv
+!data/deliveries.csv
+!data/cricket_ground_sizes.csv
