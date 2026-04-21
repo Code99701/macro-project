@@ -1,0 +1,17 @@
+# IPL Win Predictor — Full Requirements
+# Install with: pip install -r requirements.txt
+
+# Web framework
+flask
+flask-sqlalchemy
+
+# Data & ML
+pandas
+numpy
+scikit-learn
+
+# Jupyter (for notebooks/)
+jupyter
+
+# Legacy Streamlit app (app.py — optional)
+streamlit

@@ -1,0 +1,498 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IPL Win Predictor & Analyzer — Elite Edition</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@400;500;600;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap"
+    rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+
+<body>
+
+  <div class="wrap">
+    <!-- HEADER -->
+    <header>
+      <div class="header-eyebrow">Indian Premier League · 2008–2019 · Data Analytics</div>
+      <h1 class="site-title">IPL WIN PREDICTOR<br>& ANALYZER</h1>
+      <p class="site-subtitle">Real-Time Match Prediction · Comprehensive Statistics · Historical Insights</p>
+    </header>
+
+    <!-- LIVE TICKER -->
+    <div class="ticker-bar">
+      <div class="ticker-inner" id="ticker">
+        <span class="ticker-item">🏏 <span>MI</span> 4× Champions</span>
+        <span class="ticker-item">⭐ <span>V Kohli</span> 5,434 runs — All-Time Leader</span>
+        <span class="ticker-item">🎯 <span>SL Malinga</span> 170 wickets — Top Bowler</span>
+        <span class="ticker-item">💥 <span>CH Gayle</span> 327 sixes</span>
+        <span class="ticker-item">🏆 <span>CSK</span> 61% win rate — Best ever</span>
+        <span class="ticker-item">🌟 <span>AB de Villiers</span> 148.7 strike rate</span>
+        <span class="ticker-item">📊 <span>756 matches</span> across 12 seasons</span>
+        <span class="ticker-item">🏏 <span>MI</span> 4× Champions</span>
+        <span class="ticker-item">⭐ <span>V Kohli</span> 5,434 runs — All-Time Leader</span>
+        <span class="ticker-item">🎯 <span>SL Malinga</span> 170 wickets — Top Bowler</span>
+        <span class="ticker-item">💥 <span>CH Gayle</span> 327 sixes</span>
+        <span class="ticker-item">🏆 <span>CSK</span> 61% win rate — Best ever</span>
+        <span class="ticker-item">🌟 <span>AB de Villiers</span> 148.7 strike rate</span>
+        <span class="ticker-item">📊 <span>756 matches</span> across 12 seasons</span>
+      </div>
+    </div>
+
+    <!-- NAV -->
+    <div class="nav-tabs" role="tablist">
+      <button class="nav-tab active" onclick="showPanel('predictor')" role="tab">🏏 Predictor</button>
+      <button class="nav-tab" onclick="showPanel('teams')" role="tab">🏆 Teams</button>
+      <button class="nav-tab" onclick="showPanel('players')" role="tab">⭐ Players</button>
+      <button class="nav-tab" onclick="showPanel('h2h')" role="tab">⚔️ Head-to-Head</button>
+      <button class="nav-tab" onclick="showPanel('seasons')" role="tab">📅 Seasons</button>
+      <button class="nav-tab" onclick="showPanel('venues')" role="tab">🏟️ Venues</button>
+    </div>
+
+    <!-- ============ PREDICTOR PANEL ============ -->
+    <div class="panel active" id="panel-predictor">
+      <div class="grid2">
+        <!-- LEFT: Form -->
+        <div class="card card-gold">
+          <div class="card-title">Match Status Predictor</div>
+          <div class="card-sub">Enter live match details to calculate win probability</div>
+
+          <div class="pred-grid">
+            <div class="form-group">
+              <label class="form-label">Batting Team</label>
+              <select class="form-select" id="bat-team">
+                <option value="">Select Batting Team</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Bowling Team</label>
+              <select class="form-select" id="bowl-team">
+                <option value="">Select Bowling Team</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group" style="margin-bottom: 16px;">
+            <label class="form-label">Host City</label>
+            <select class="form-select" id="host-city">
+              <option value="">Select Host City</option>
+            </select>
+          </div>
+
+          <div class="pred-grid">
+            <div class="form-group">
+              <label class="form-label">Target Score</label>
+              <input class="form-input" id="target" type="number" placeholder="e.g. 185" min="1" max="350">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Current Score</label>
+              <input class="form-input" id="current-score" type="number" placeholder="e.g. 120" min="0" max="350">
+            </div>
+          </div>
+
+          <div class="pred-grid">
+            <div class="form-group">
+              <label class="form-label">Wickets Out</label>
+              <input class="form-input" id="wickets" type="number" placeholder="e.g. 3" min="0" max="10">
+            </div>
+            <div class="form-group" style="justify-content: flex-end;">
+              <div class="slider-row">
+                <div class="slider-label-row">
+                  <span class="form-label">Overs Completed</span>
+                  <span class="slider-val" id="overs-val">10.0</span>
+                </div>
+                <input type="range" id="overs-slider" min="0" max="120" value="60" step="1"
+                  oninput="updateOversSlider(this)">
+              </div>
+            </div>
+          </div>
+
+          <button class="btn-predict" onclick="predict()">PREDICT NOW</button>
+          <div class="input-error" id="input-error">
+            <div class="err-inner">
+              <span class="err-icon">⚠️</span>
+              <div class="err-body">
+                <div class="err-title">Invalid Input Detected</div>
+                <div class="err-message" id="err-msg"></div>
+              </div>
+              <button class="err-close" onclick="clearInputError()" title="Dismiss">✕</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT: Tips & Quick Stats -->
+        <div style="display: flex; flex-direction: column; gap: 16px;">
+          <div class="card">
+            <div class="card-title">Quick Team Stats</div>
+            <div class="card-sub">Overall performance 2008–2019</div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;" id="quick-stats">
+              <!-- filled by JS -->
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-title">Prediction Guide</div>
+            <div class="card-sub">Factors used in our algorithm</div>
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+              <div
+                style="display: flex; align-items: center; gap: 10px; padding: 10px; background: var(--navy2); border-radius: 10px;">
+                <span style="font-size: 18px;">📊</span>
+                <div>
+                  <div style="font-family: 'Rajdhani'; font-size: 13px; font-weight: 700; color: var(--text);">Run Rate
+                    Analysis</div>
+                  <div style="font-size: 11px; color: var(--text3);">Current vs Required run rate ratio</div>
+                </div>
+              </div>
+              <div
+                style="display: flex; align-items: center; gap: 10px; padding: 10px; background: var(--navy2); border-radius: 10px;">
+                <span style="font-size: 18px;">🎯</span>
+                <div>
+                  <div style="font-family: 'Rajdhani'; font-size: 13px; font-weight: 700; color: var(--text);">Wickets
+                    in Hand</div>
+                  <div style="font-size: 11px; color: var(--text3);">Resources available for chase</div>
+                </div>
+              </div>
+              <div
+                style="display: flex; align-items: center; gap: 10px; padding: 10px; background: var(--navy2); border-radius: 10px;">
+                <span style="font-size: 18px;">📈</span>
+                <div>
+                  <div style="font-family: 'Rajdhani'; font-size: 13px; font-weight: 700; color: var(--text);">
+                    Historical Win Rate</div>
+                  <div style="font-size: 11px; color: var(--text3);">Team's track record at venue</div>
+                </div>
+              </div>
+              <div
+                style="display: flex; align-items: center; gap: 10px; padding: 10px; background: var(--navy2); border-radius: 10px;">
+                <span style="font-size: 18px;">⏱️</span>
+                <div>
+                  <div style="font-family: 'Rajdhani'; font-size: 13px; font-weight: 700; color: var(--text);">Momentum
+                    Score</div>
+                  <div style="font-size: 11px; color: var(--text3);">Match phase and pressure index</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RESULT PANEL -->
+      <div id="result-panel">
+        <div style="text-align: center; margin-bottom: 12px;">
+          <span class="live-dot"></span>
+          <span
+            style="font-family: 'Rajdhani'; font-size: 11px; font-weight: 700; letter-spacing: 2px; color: var(--text3);">LIVE
+            PREDICTION</span>
+        </div>
+
+        <div class="gauge-container">
+          <svg class="gauge-svg" id="gauge-svg" viewBox="0 0 300 170" width="300" height="170" role="img"
+            aria-label="Win probability gauge">
+            <defs>
+              <linearGradient id="gaugeGrad1" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" style="stop-color:#E63946" />
+                <stop offset="50%" style="stop-color:#F5C842" />
+                <stop offset="100%" style="stop-color:#2DC653" />
+              </linearGradient>
+            </defs>
+            <!-- Track -->
+            <path id="gauge-track" d="M 30,145 A 120,120 0 0,1 270,145" fill="none" stroke="rgba(255,255,255,0.06)"
+              stroke-width="14" stroke-linecap="round" />
+            <!-- Fill -->
+            <path id="gauge-fill" d="M 30,145 A 120,120 0 0,1 270,145" fill="none" stroke="url(#gaugeGrad1)"
+              stroke-width="14" stroke-linecap="round" stroke-dasharray="377" stroke-dashoffset="377"
+              style="transition: stroke-dashoffset 1.2s cubic-bezier(0.34,1.56,0.64,1)" />
+            <!-- Needle -->
+            <g id="gauge-needle"
+              style="transform-origin: 150px 145px; transform: rotate(-90deg); transition: transform 1.2s cubic-bezier(0.34,1.56,0.64,1)">
+              <line x1="150" y1="145" x2="150" y2="40" stroke="white" stroke-width="2.5" stroke-linecap="round"
+                opacity="0.9" />
+              <circle cx="150" cy="145" r="6" fill="white" opacity="0.9" />
+            </g>
+            <!-- Labels -->
+            <text x="25" y="168" fill="#E63946" font-size="10" font-family="Bebas Neue" letter-spacing="1">0%</text>
+            <text x="143" y="30" fill="#F5C842" font-size="10" font-family="Bebas Neue" text-anchor="middle">50%</text>
+            <text x="265" y="168" fill="#2DC653" font-size="10" font-family="Bebas Neue" text-anchor="end">100%</text>
+            <!-- Center text -->
+            <text id="gauge-pct-text" x="150" y="130" fill="white" font-size="36" font-family="Bebas Neue"
+              text-anchor="middle" letter-spacing="2">--%</text>
+            <text id="gauge-winner-text" x="150" y="148" fill="#9AA3C4" font-size="9" font-family="Rajdhani"
+              text-anchor="middle" font-weight="700" letter-spacing="1"></text>
+          </svg>
+        </div>
+
+        <div class="prob-teams" id="prob-teams-display">
+          <div>
+            <div class="prob-pct prob-bat" id="bat-prob">--%</div>
+            <div class="prob-team-name" id="bat-team-display">Batting Team</div>
+            <div style="font-size: 11px; color: var(--text3); margin-top: 2px;">Batting</div>
+          </div>
+          <div class="prob-vs">VS</div>
+          <div>
+            <div class="prob-pct prob-bowl" id="bowl-prob">--%</div>
+            <div class="prob-team-name" id="bowl-team-display">Bowling Team</div>
+            <div style="font-size: 11px; color: var(--text3); margin-top: 2px;">Bowling (chasing from 2nd)</div>
+          </div>
+        </div>
+
+        <div class="result-stats">
+          <div class="rs-item">
+            <div class="rs-label">Required RR</div>
+            <div class="rs-value" id="rs-rrr">--</div>
+          </div>
+          <div class="rs-item">
+            <div class="rs-label">Current RR</div>
+            <div class="rs-value" id="rs-crr">--</div>
+          </div>
+          <div class="rs-item">
+            <div class="rs-label">Runs Needed</div>
+            <div class="rs-value" id="rs-runs">--</div>
+          </div>
+          <div class="rs-item">
+            <div class="rs-label">Balls Left</div>
+            <div class="rs-value" id="rs-balls">--</div>
+          </div>
+        </div>
+
+        <div id="prediction-insight"
+          style="margin-top: 16px; padding: 14px; background: var(--navy2); border-radius: 10px; font-size: 13px; color: var(--text2); line-height: 1.6; border-left: 3px solid var(--gold);">
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ TEAMS PANEL ============ -->
+    <div class="panel" id="panel-teams">
+      <div class="section-header"><span class="section-title">Overall League Standings</span>
+        <div class="section-line"></div>
+      </div>
+
+      <div class="grid4" style="margin-bottom: 28px;">
+        <div class="stat-card">
+          <div class="sc-label">Total Matches</div>
+          <div class="sc-value">756</div>
+          <div class="sc-sub">2008 – 2019</div>
+        </div>
+        <div class="stat-card">
+          <div class="sc-label">Total Teams</div>
+          <div class="sc-value">15</div>
+          <div class="sc-sub">Including defunct</div>
+        </div>
+        <div class="stat-card">
+          <div class="sc-label">Highest Win%</div>
+          <div class="sc-value" style="color: var(--gold);">61%</div>
+          <div class="sc-sub">Chennai Super Kings</div>
+        </div>
+        <div class="stat-card">
+          <div class="sc-label">Most Titles</div>
+          <div class="sc-value" style="color: var(--gold);">4×</div>
+          <div class="sc-sub">Mumbai Indians</div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-bottom: 28px; padding: 0; overflow: hidden;">
+        <table class="team-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Team</th>
+              <th>Matches</th>
+              <th>Won</th>
+              <th>Lost</th>
+              <th>Win %</th>
+              <th>Win Rate</th>
+              <th>Titles</th>
+            </tr>
+          </thead>
+          <tbody id="teams-tbody"></tbody>
+        </table>
+      </div>
+
+      <div class="grid2">
+        <div class="card">
+          <div class="card-title">Win Rates by Team</div>
+          <div class="card-sub">Horizontal comparison across all teams</div>
+          <div class="chart-wrap" style="height: 340px;">
+            <canvas id="chartTeamWins" role="img" aria-label="Bar chart showing win percentages by IPL team"></canvas>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">Toss Decision Impact</div>
+          <div class="card-sub">How batting vs fielding first affects results</div>
+          <div style="display: flex; gap: 10px; margin-bottom: 14px;">
+            <div style="flex: 1; background: var(--navy2); border-radius: 10px; padding: 14px; text-align: center;">
+              <div style="font-family: 'Bebas Neue'; font-size: 36px; color: #4F8EF7;">52.3%</div>
+              <div style="font-size: 11px; color: var(--text3); margin-top: 2px;">Toss winners win match</div>
+            </div>
+            <div style="flex: 1; background: var(--navy2); border-radius: 10px; padding: 14px; text-align: center;">
+              <div style="font-family: 'Bebas Neue'; font-size: 36px; color: var(--green);">66%</div>
+              <div style="font-size: 11px; color: var(--text3); margin-top: 2px;">Field-first toss winners win</div>
+            </div>
+          </div>
+          <div class="chart-wrap" style="height: 200px;">
+            <canvas id="chartToss" role="img" aria-label="Doughnut chart showing toss decision outcomes"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ PLAYERS PANEL ============ -->
+    <div class="panel" id="panel-players">
+      <div class="section-header"><span class="section-title">Player Statistics</span>
+        <div class="section-line"></div>
+      </div>
+
+      <div class="grid2" style="margin-bottom: 20px;">
+        <div class="card">
+          <div class="card-title">🏏 Top Run Scorers</div>
+          <div class="card-sub">IPL career runs 2008–2019</div>
+          <div id="batsmen-list"></div>
+        </div>
+        <div class="card">
+          <div class="card-title">🎯 Top Wicket Takers</div>
+          <div class="card-sub">IPL career wickets 2008–2019</div>
+          <div id="bowlers-list"></div>
+        </div>
+      </div>
+
+      <div class="grid2">
+        <div class="card">
+          <div class="card-title">Run Scoring Comparison</div>
+          <div class="card-sub">Top 8 batsmen by career runs</div>
+          <div class="chart-wrap" style="height: 320px;">
+            <canvas id="chartBatsmen" role="img" aria-label="Horizontal bar chart of top IPL run scorers"></canvas>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">Strike Rate vs Runs</div>
+          <div class="card-sub">Volume vs efficiency scatter plot</div>
+          <div class="chart-wrap" style="height: 320px;">
+            <canvas id="chartSR" role="img" aria-label="Bubble chart of batsmen strike rate vs runs"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ H2H PANEL ============ -->
+    <div class="panel" id="panel-h2h">
+      <div class="section-header"><span class="section-title">Head-to-Head Matchups</span>
+        <div class="section-line"></div>
+      </div>
+
+      <div class="card card-gold" style="margin-bottom: 24px;">
+        <div class="card-title">Direct Comparison</div>
+        <div class="card-sub">Select two teams to see their head-to-head record</div>
+        <div class="h2h-select-row">
+          <select class="form-select" id="h2h-team1" onchange="updateH2H()">
+            <option value="">Team 1</option>
+          </select>
+          <div class="h2h-vs">VS</div>
+          <select class="form-select" id="h2h-team2" onchange="updateH2H()">
+            <option value="">Team 2</option>
+          </select>
+        </div>
+
+        <div class="h2h-result" id="h2h-result" style="display: none;">
+          <div>
+            <div class="h2h-wins" style="color: #4F8EF7;" id="h2h-w1">0</div>
+            <div class="h2h-team" id="h2h-n1">Team 1</div>
+          </div>
+          <div style="text-align: center;">
+            <div
+              style="font-family: 'Rajdhani'; font-size: 11px; font-weight: 700; letter-spacing: 2px; color: var(--text3);">
+              TOTAL WINS</div>
+            <div style="font-family: 'Bebas Neue'; font-size: 20px; color: var(--text3); margin-top: 4px;"
+              id="h2h-total">0 matches</div>
+          </div>
+          <div>
+            <div class="h2h-wins" style="color: #F5834A;" id="h2h-w2">0</div>
+            <div class="h2h-team" id="h2h-n2">Team 2</div>
+          </div>
+        </div>
+
+        <div class="h2h-bar-section" id="h2h-bar-section" style="display: none;">
+          <div class="h2h-bar-container">
+            <div class="h2h-bar-t1" id="h2h-bar1" style="width: 50%;"></div>
+            <div class="h2h-bar-t2" id="h2h-bar2" style="width: 50%;"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-header"><span class="section-title" style="font-size: 20px;">Full H2H Matrix</span>
+        <div class="section-line"></div>
+      </div>
+      <div class="card" style="padding: 0; overflow: hidden;">
+        <div class="h2h-table-wrap">
+          <table class="h2h-matrix" id="h2h-matrix">
+            <!-- built by JS -->
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ SEASONS PANEL ============ -->
+    <div class="panel" id="panel-seasons">
+      <div class="section-header"><span class="section-title">Season Champions</span>
+        <div class="section-line"></div>
+      </div>
+
+      <div class="season-grid" id="season-grid" style="margin-bottom: 32px;"></div>
+
+      <div class="section-header"><span class="section-title">Season Wins by Team</span>
+        <div class="section-line"></div>
+      </div>
+      <div class="card">
+        <div class="chart-wrap" style="height: 360px;">
+          <canvas id="chartSeasons" role="img"
+            aria-label="Stacked bar chart of IPL match wins by team per season"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ VENUES PANEL ============ -->
+    <div class="panel" id="panel-venues">
+      <div class="section-header"><span class="section-title">Venue Analysis</span>
+        <div class="section-line"></div>
+      </div>
+
+      <div class="grid2">
+        <div class="card" style="margin-bottom: 24px;">
+          <div class="card-title">Top Venues</div>
+          <div class="card-sub">Batting-first win percentage at each ground</div>
+          <div id="venue-list"></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Bat First Win % by Venue</div>
+          <div class="card-sub">Toss and venue advantage analysis</div>
+          <div class="chart-wrap" style="height: 340px;">
+            <canvas id="chartVenues" role="img"
+              aria-label="Bar chart showing batting-first win percentages at top IPL venues"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Player of the Match Leaders</div>
+        <div class="card-sub">Most match-winning performances (IPL 2008–2019)</div>
+        <div class="chart-wrap" style="height: 300px;">
+          <canvas id="chartPOM" role="img" aria-label="Bar chart of player of the match award leaders"></canvas>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /wrap -->
+
+  <footer>
+    <div class="wrap">
+      Built with real IPL data 2008–2019 · 756 matches · 179,077 deliveries analyzed<br>
+      <span style="color: var(--surface3); margin-top: 4px; display: block;">Prediction algorithm uses CRR/RRR analysis,
+        wicket pressure index & historical team performance</span>
+    </div>
+  </footer>
+
+  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+
+</html>
