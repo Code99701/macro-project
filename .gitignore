@@ -1,5 +1,7 @@
 *.pkl
-*.csv
 *.pbix
 *.zip
 __pycache__/
+
+data/*
+!data/sample_matches.csv
