@@ -236,6 +236,10 @@ def physics_calibrate(win_prob, loss_prob, crr, rrr, wickets_left, balls_left, a
 
 
 def compute_single_prob(batting_team, bowling_team, city, target, score, overs, wickets_out):
+    # ✅ CRITICAL FIX
+    if pipe is None:
+        return (50, 50)
+
     city_norm    = normalize_city(city)
     bat_norm     = normalize_team(batting_team)
     bowl_norm    = normalize_team(bowling_team)
@@ -267,16 +271,19 @@ def compute_single_prob(batting_team, bowling_team, city, target, score, overs, 
     })
     input_df = add_engineered_features(input_df)
 
-    result    = pipe.predict_proba(input_df)
-    loss_prob = round(result[0][0] * 100)
-    win_prob  = round(result[0][1] * 100)
-    win_prob += 100 - (loss_prob + win_prob)
+    try:
+        result    = pipe.predict_proba(input_df)
+        loss_prob = round(result[0][0] * 100)
+        win_prob  = round(result[0][1] * 100)
+        win_prob += 100 - (loss_prob + win_prob)
 
-    win_prob, loss_prob = physics_calibrate(
-        win_prob, loss_prob, crr, rrr, wickets_left, balls_left, avg_boundary, runs_left
-    )
-
-    return (loss_prob, win_prob)
+        win_prob, loss_prob = physics_calibrate(
+            win_prob, loss_prob, crr, rrr, wickets_left, balls_left, avg_boundary, runs_left
+        )
+        return (loss_prob, win_prob)
+    except Exception as e:
+        print("[ERROR] Prediction failed:", e)
+        return (50, 50)
 
 
 def generate_synthetic_progression(batting_team, bowling_team, city, target, score, overs, wickets_out):
