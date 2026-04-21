@@ -21,17 +21,37 @@ with app.app_context():
 
 ML_DIR     = os.path.join(BASE_DIR, 'ml')
 DATA_DIR   = os.path.join(BASE_DIR, 'data')
+import gdown
+
+
+
+PIPE_PATH = os.path.join(ML_DIR, 'pipe.pkl')
+GROUND_PATH = os.path.join(ML_DIR, 'ground_map.pkl')
+
+PIPE_ID = "11WL1F3l0WnMOZ1ualy0_CpkSPhOnrS7C"
+GROUND_ID = "1NtvcJ3z-akUdiIxebnd3lEtLzX4rjD-x"
+
+def download_if_needed(file_id, output):
+    if not os.path.exists(output):
+        print(f"[INFO] Downloading {output}...")
+        gdown.download(id=file_id, output=output, quiet=False)
+
+# Download models
+download_if_needed(PIPE_ID, PIPE_PATH)
+download_if_needed(GROUND_ID, GROUND_PATH)
+
+# 🔥 LOAD MODELS (YOU MISSED THIS)
 try:
-    pipe = pickle.load(open(os.path.join(ML_DIR, 'pipe.pkl'), 'rb'))
+    pipe = pickle.load(open(PIPE_PATH, 'rb'))
 except:
     pipe = None
-    print("[WARNING] pipe.pkl not loaded")
+    print("[ERROR] pipe not loaded")
 
 try:
-    GROUND_MAP = pickle.load(open(os.path.join(ML_DIR, 'ground_map.pkl'), 'rb'))
+    GROUND_MAP = pickle.load(open(GROUND_PATH, 'rb'))
 except:
     GROUND_MAP = {}
-    print("[WARNING] ground_map.pkl not loaded")
+    print("[ERROR] ground map not loaded")
 
 CITY_ALIASES = {
     'Bangalore':  'Bengaluru',
@@ -236,10 +256,6 @@ def physics_calibrate(win_prob, loss_prob, crr, rrr, wickets_left, balls_left, a
 
 
 def compute_single_prob(batting_team, bowling_team, city, target, score, overs, wickets_out):
-    # ✅ CRITICAL FIX
-    if pipe is None:
-        return (50, 50)
-
     city_norm    = normalize_city(city)
     bat_norm     = normalize_team(batting_team)
     bowl_norm    = normalize_team(bowling_team)
@@ -271,19 +287,16 @@ def compute_single_prob(batting_team, bowling_team, city, target, score, overs, 
     })
     input_df = add_engineered_features(input_df)
 
-    try:
-        result    = pipe.predict_proba(input_df)
-        loss_prob = round(result[0][0] * 100)
-        win_prob  = round(result[0][1] * 100)
-        win_prob += 100 - (loss_prob + win_prob)
+    result    = pipe.predict_proba(input_df)
+    loss_prob = round(result[0][0] * 100)
+    win_prob  = round(result[0][1] * 100)
+    win_prob += 100 - (loss_prob + win_prob)
 
-        win_prob, loss_prob = physics_calibrate(
-            win_prob, loss_prob, crr, rrr, wickets_left, balls_left, avg_boundary, runs_left
-        )
-        return (loss_prob, win_prob)
-    except Exception as e:
-        print("[ERROR] Prediction failed:", e)
-        return (50, 50)
+    win_prob, loss_prob = physics_calibrate(
+        win_prob, loss_prob, crr, rrr, wickets_left, balls_left, avg_boundary, runs_left
+    )
+
+    return (loss_prob, win_prob)
 
 
 def generate_synthetic_progression(batting_team, bowling_team, city, target, score, overs, wickets_out):

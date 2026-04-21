@@ -16,3 +16,4 @@ jupyter
 # Legacy Streamlit app (app.py — optional)
 streamlit
 gunicorn
+gdown
