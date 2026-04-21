@@ -1,4 +1,4 @@
-*.pkl
+ml/*.pkl
 *.pbix
 *.zip
 __pycache__/
